@@ -86,7 +86,7 @@ input:focus{outline:3px solid #8fbce0;border-color:#3f86ad}
 <script>
 const app=document.getElementById('app'),sum=document.getElementById('sum');
 const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-const SCRIPT_URL=''; // ← встав сюди адресу веб-застосунку Google Apps Script (закінчується на /exec)
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycby3KIRY4woH0qQ0dH6wxS1u2JKbRTzhyRrjZjaZAzubW_2iyHs7O4XhxKKX9X004Yer/exec'; // ← встав сюди адресу веб-застосунку Google Apps Script (закінчується на /exec)
 const $=i=>document.getElementById(i);
 const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
 let secs=[],mode='trainer',items=[],student={},t0=0,elapsed=0,finished=false,started=false,payload=null;
