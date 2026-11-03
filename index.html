@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Рухи Землі та теплові пояси</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:"Trebuchet MS",Verdana,Arial,sans-serif;background:#f3f1e6;color:#1f2d3a;line-height:1.45}
+main{max-width:760px;margin:0 auto;padding:12px}
+header{background:#3f86ad;color:#fff;border-radius:6px 6px 28px 6px;padding:18px 16px}
+h1{margin:0;font-size:1.55rem;letter-spacing:.5px}
+header p{margin:4px 0 0;opacity:.95}
+#bar{position:sticky;top:0;z-index:5;background:#f3f1e6;padding:8px 0 6px}
+.tr{height:12px;background:#d9d6c4;border-radius:8px;overflow:hidden}
+#bar i{display:block;height:100%;width:0;background:#2f9a45;transition:width .3s}
+#st{font-size:.85rem;color:#5a5a48}
+section{background:#fff;border-left:8px solid #3f86ad;border-radius:4px 16px 16px 4px;padding:14px;margin:14px 0}
+h2{margin:0 0 4px;font-size:1.2rem;color:#2b6a8f;display:flex;justify-content:space-between;gap:8px;align-items:center}
+h2 b{font-size:.9rem;background:#fbe9a8;color:#6b5200;border-radius:12px;padding:2px 10px;white-space:nowrap}
+.i{margin:0 0 8px;color:#5a5a48}
+.q{border-left:5px solid #d9d6c4;padding:6px 10px;margin:10px 0}
+.q.r{border-color:#2f9a45}.q.w{border-color:#d33}
+.q p{margin:0 0 6px;font-weight:700}
+.o{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;padding:8px 12px;border:2px solid #b8c6cf;background:#f7fafc;border-radius:10px;cursor:pointer;color:#1f2d3a}
+button:hover:not(:disabled){background:#e3f0f8}
+button:focus-visible{outline:3px solid #f0a000}
+button:disabled{cursor:default}
+button:disabled:not(.ok):not(.bad){opacity:.55}
+button.ok{background:#c9f0cf;border-color:#2f9a45;color:#0d4d1a}
+button.bad{background:#ffd3d3;border-color:#d33;color:#7a0d0d}
+.orb{width:100%;max-height:270px;display:block}
+.pt{cursor:pointer}
+.pt .e{fill:#4a90d9;stroke:#1d5a8a;stroke-width:2}
+.pt:hover .e{fill:#6aaae6}
+.pt.ok .e{fill:#2f9a45}
+.pt.bad .e{fill:#d33}
+#qt{font-weight:700;margin:4px 0}
+#sum{border-left-color:#f0a000;text-align:center}
+#sum:empty{display:none}
+.big{font-size:2.6rem;font-weight:700;color:#2b6a8f}
+.row{display:flex;justify-content:space-between;text-align:left;padding:5px 0;border-bottom:1px dashed #d9d6c4}
+.row b.g{color:#2f9a45}.row b.r{color:#d33}
+#fin{display:block;margin:6px auto 24px;background:#3f86ad;color:#fff;border-color:#2b6a8f}
+#fin:hover{background:#2b6a8f!important}
+[hidden]{display:none!important}
+#modes{display:flex;gap:8px;margin:12px 0 0;flex-wrap:wrap}
+#modes button.on{background:#3f86ad;color:#fff;border-color:#2b6a8f}
+button.sel,button.sel:hover{background:#d6e6ff;border-color:#2f6fd0;color:#12305f}
+.pt.sel .e{fill:#1d4fa8;stroke:#0b2a66;stroke-width:4}
+label{display:block;font-weight:700;margin:10px 0 0}
+input{display:block;width:100%;max-width:380px;font:inherit;padding:10px;border:2px solid #b8c6cf;border-radius:8px;margin:4px 0 4px;background:#fff;color:#1f2d3a}
+input:focus{outline:3px solid #8fbce0;border-color:#3f86ad}
+.note{margin:6px 0 10px;padding-left:22px}.note li{margin:3px 0}
+.hint{background:#e3effa;border-left:5px solid #2f6fd0;border-radius:4px 12px 12px 4px;padding:10px 12px;margin:14px 0}
+#regerr{color:#d33;margin:0 0 6px}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>Рухи Землі та теплові пояси</h1>
+<p>Природа · тести й завдання за підручником, с. 47–55</p>
+</header>
+<div id="modes"><button id="m1" onclick="setMode('trainer')">Тренажер</button><button id="m2" onclick="setMode('test')">Діагностувальна робота</button></div>
+<section id="reg" hidden><h2><span>Діагностувальна робота</span></h2>
+<div id="regform">
+<ul class="note">
+<li>Правильні відповіді <b>не показуються одразу</b>: ти побачиш їх після завершення роботи.</li>
+<li>Обрану відповідь (вона підсвічується синім) можна <b>змінити</b>, поки не натиснеш «Завершити роботу».</li>
+<li>Пройти роботу можна <b>лише один раз</b>.</li>
+<li>Результат автоматично надсилається вчителю.</li>
+</ul>
+<label>Прізвище<input id="sn" maxlength="30" autocomplete="off"></label>
+<label>Ім’я<input id="nm" maxlength="30" autocomplete="off"></label>
+<label>Клас<input id="cls" maxlength="20" autocomplete="off"></label>
+<p id="regerr"></p><button onclick="startTest()">Почати</button></div>
+<div id="blocked" hidden><p>Діагностувальну роботу на цьому пристрої вже розпочато або виконано. Пройти її можна лише один раз.</p><p class="ss"></p></div>
+</section>
+<div id="bar"><div class="tr"><i id="pr"></i></div><span id="st"></span></div>
+<div id="app"></div>
+<section id="sum"></section>
+<button id="fin" onclick="summary()">Показати підсумок</button>
+</main>
+<script>
+const app=document.getElementById('app'),sum=document.getElementById('sum');
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const SCRIPT_URL=''; // ← встав сюди адресу веб-застосунку Google Apps Script (закінчується на /exec)
+const $=i=>document.getElementById(i);
+const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+let secs=[],mode='trainer',items=[],student={},t0=0,elapsed=0,finished=false,started=false,payload=null;
+
+const TP=[
+['Навколо чого обертається Земля, що спричиняє зміну дня і ночі?','Навколо своєї осі','Навколо Сонця','Навколо Місяця'],
+['У якому напрямку Земля обертається навколо своєї осі?','Із заходу на схід','Зі сходу на захід','З півночі на південь'],
+['Скільки годин триває доба?','24 години','12 годин','48 годин'],
+['Що таке доба?','Час, за який Земля робить повний оберт навколо осі','Час, за який Земля робить повний оберт навколо Сонця','Час від сходу до заходу Сонця'],
+['Що зумовлює добові ритми в природі?','Зміна дня і ночі','Зміна пір року','Рух Місяця'],
+['Яка тварина відпочиває вдень, а з настанням сутінків вилітає на полювання?','Сова','Синиця','Дрізд'],
+['Скільки діб у році беруть для зручності підрахунків?','365','366','360'],
+['Скільки днів має лютий у високосному році?','29','28','30'],
+['Як часто до року додають зайву добу?','До кожного четвертого року','До кожного другого року','До кожного десятого року'],
+['Що спричиняє рух Землі навколо Сонця?','Зміну пір року','Зміну дня і ночі','Появу зірок на небі'],
+['Якого числа у Північній півкулі найдовший день?','22 червня','22 грудня','21 березня'],
+['Якою є тривалість дня і ночі в дні рівнодення?','По 12 годин','День 17 годин, ніч 7 годин','День 7 годин, ніч 17 годин'],
+['Якого числа день осіннього рівнодення (у Північній півкулі)?','23 вересня','21 березня','22 червня'],
+['Чому на Землі змінюються пори року?','Земля рухається навколо Сонця, а її уявна вісь нахилена','Земля обертається навколо своєї осі','Сонце рухається навколо Землі'],
+['Де сонячні промені падають майже весь час прямовисно?','У жаркому поясі','У помірному поясі','У холодному поясі'],
+['Що буває в холодному поясі?','Полярний день і полярна ніч','Сухий і дощовий періоди','Чотири пори року'],
+['Коли в Південній півкулі літо?','Коли в Північній півкулі зима','Коли в Північній півкулі літо','Одночасно з Північною півкулею'],
+['Скільки приблизно триває найдовший день в Україні (22 червня)?','17 годин','12 годин','7 годин']
+];
+const DP=[['Зміна дня і ночі',0],['Поява зірок на небі',0],['Відкриваються квітки латаття білого вранці',0],['Вилітання на полювання сов і кажанів',0],['Зміна пір року',1],['Поява жовтого листя, листопад',1],['Прихід зимових холодів',1],['Гніздування птахів',1],['Льодохід на річках',1]];
+const DO=['Обертання навколо осі','Рух навколо Сонця'];
+const ZN=['Жаркий пояс','Помірний пояс','Холодний пояс'];
+const ZP=[['Сонячні промені падають майже весь час прямовисно',0],['Замість зими й літа — сухий період і період злив',0],['Біля екватора ростуть густі вічнозелені ліси',0],['Узимку промені падають косо, а влітку — пряміше',1],['Є чотири пори року, між зимою й літом — прохолодні весна й осінь',1],['Бувають полярний день і полярна ніч',2],['Падають лише косі промені, які погано нагрівають землю',2],['Живуть лише ті рослини й тварини, що пристосувалися до суворих умов',2]];
+const AP=[['Слон',0],['Лев',0],['Тукан',0],['Папуга ара',0],['Крокодил',0],['Орангутан',0],['Кенгуру',0],['Бурий ведмідь',1],['Вовк',1],['Плямистий олень',1],['Єнот',1],['Гадюка',1],['Орел',1],['Північний олень',2],['Морж',2],['Вівцебик',2],['Песець',2],['Заєць-біляк',2],['Біла сова',2]];
+const YP=[2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030,2032,2036];
+const QP=[['Де Земля, коли в Північній півкулі літо?',0],['Де Земля, коли в Північній півкулі зима?',2],['Де Земля, коли в Південній півкулі літо?',2],['Де Земля, коли в Південній півкулі зима?',0],['Де Земля в день найдовшого дня у Північній півкулі?',0],['Де Земля в день найкоротшого дня у Північній півкулі?',2],['Де Земля в день осіннього рівнодення?',3],['Де Земля в день весняного рівнодення?',1],['Де Земля, коли в північному холодному поясі полярна ніч?',2]];
+
+function sec(n,t,max,g){
+ const c=document.createElement('section'),b=document.createElement('b');
+ c.innerHTML='<h2><span>'+n+'</span></h2><p class="i">'+t+'</p>';
+ c.firstChild.appendChild(b);app.appendChild(c);
+ const s={n,max,g:g||0,got:0,done:0,box:c,b};b.textContent=mode=='test'?'':'0/'+max;secs.push(s);return s}
+function ans(s,ok){s.done++;if(ok)s.got++;s.b.textContent=s.got+'/'+s.max;upd()}
+function upd(){
+ let D,M;
+ if(mode=='test'){M=items.length;D=items.filter(i=>i.picked!=null).length;$('fin').disabled=finished||D<M}
+ else{D=secs.reduce((a,s)=>a+s.done,0);M=secs.reduce((a,s)=>a+s.max,0)}
+ $('pr').style.width=(M?D/M*100:0)+'%';
+ $('st').textContent=(mode=='test'?'Відповіді: ':'Виконано: ')+D+' з '+M;
+ if(mode!='test'&&M&&D==M)setTimeout(summary,900)}
+function mc(s,text,right,opts,fix){
+ const d=document.createElement('div'),w=document.createElement('div'),it={s,text:text.replace(/<[^>]+>/g,''),right,picked:null,d,w};
+ items.push(it);
+ d.className='q';d.innerHTML='<p>'+text+'</p>';w.className='o';
+ (fix?opts:sh(opts)).forEach(o=>{
+  const b=document.createElement('button');b.textContent=o;
+  b.onclick=()=>{
+   if(mode=='test'){if(finished)return;[...w.children].forEach(x=>x.classList.remove('sel'));b.classList.add('sel');it.picked=o;upd();return}
+   const bs=[...w.children];bs.forEach(x=>x.disabled=true);
+   const ok=o===right;b.classList.add(ok?'ok':'bad');
+   if(!ok)bs.find(x=>x.textContent===right).classList.add('ok');
+   d.classList.add(ok?'r':'w');ans(s,ok)};
+  w.appendChild(b)});
+ d.appendChild(w);s.box.appendChild(d)}
+
+function orbit(){
+ const P=[[70,100],[190,35],[310,100],[190,165]],LB=['22 червня','21 березня','22 грудня','23 вересня'],LP=[[70,128],[190,16],[310,128],[190,197]];
+ const Q=sh(QP).slice(0,3),n=Q.length,s=sec('Земля на орбіті','Клікни на те місце орбіти, де знаходиться Земля. Підписано дати.',n,1);
+ const d=document.createElement('div');
+ d.innerHTML='<p id="qt"></p><svg class="orb" viewBox="0 0 380 205"><ellipse cx="190" cy="100" rx="120" ry="65" fill="none" stroke="#9b3a9b" stroke-width="3"/><circle cx="190" cy="100" r="17" fill="#ffc933" stroke="#f0a000" stroke-width="3"/><text x="190" y="134" text-anchor="middle" font-size="12" fill="#8a5a00">Сонце</text>'+
+ P.map((p,i)=>'<text x="'+LP[i][0]+'" y="'+LP[i][1]+'" text-anchor="middle" font-size="13" fill="#333">'+LB[i]+'</text><g class="pt"><circle class="e" cx="'+p[0]+'" cy="'+p[1]+'" r="15"/><circle cx="'+(p[0]+4)+'" cy="'+(p[1]-3)+'" r="6" fill="#6fbf5f" pointer-events="none"/></g>').join('')+'</svg>';
+ s.box.appendChild(d);
+ const its=Q.map(q=>({s,text:q[0],right:LB[q[1]],picked:null,orb:1}));items.push(...its);
+ const qt=d.querySelector('#qt'),gs=[...d.querySelectorAll('.pt')];let k=0,lock=false;
+ const show=()=>{qt.textContent=(k+1)+'/'+n+'. '+Q[k][0];gs.forEach(g=>g.setAttribute('class','pt'));lock=false};
+ gs.forEach((g,i)=>g.onclick=()=>{
+  if(lock)return;lock=true;
+  if(mode=='test'){its[k].picked=LB[i];g.classList.add('sel');k++;upd();setTimeout(()=>{if(k<n)show();else qt.textContent='Відповіді записано'},450);return}
+  const ok=i===Q[k][1];
+  g.classList.add(ok?'ok':'bad');if(!ok)gs[Q[k][1]].classList.add('ok');
+  ans(s,ok);k++;
+  if(k<n)setTimeout(show,1500);else qt.textContent='Завдання виконано!'});
+ show()}
+
+function init(){
+ app.innerHTML=mode=='test'?'<p class="hint">Правильні відповіді не показуються одразу. Обрану відповідь (вона підсвічується синім) можна змінити, поки не натиснеш «Завершити роботу» внизу сторінки. Кнопка стане активною, коли ти відповіси на всі питання.</p>':'';sum.innerHTML='';secs=[];items=[];finished=false;
+ const fb=$('fin');fb.textContent=mode=='test'?'Завершити роботу':'Показати підсумок';fb.onclick=mode=='test'?finish:summary;fb.disabled=mode=='test';
+ let s=sec('Тест','Обери одну правильну відповідь. Питання щоразу різні.',5,0);
+ sh(TP).slice(0,5).forEach(t=>mc(s,t[0],t[1],t.slice(1)));
+ s=sec('Обертання чи рух навколо Сонця?','З яким рухом Землі пов’язане явище?',4,1);
+ sh(DP).slice(0,4).forEach(t=>mc(s,t[0],DO[t[1]],DO,1));
+ orbit();
+ s=sec('Теплові пояси','До якого теплового поясу належить опис?',3,2);
+ sh(ZP).slice(0,3).forEach(t=>mc(s,t[0],ZN[t[1]],ZN,1));
+ s=sec('Рослини й тварини поясів','У якому тепловому поясі живе ця тварина?',3,2);
+ sh(AP).slice(0,3).forEach(t=>mc(s,'<b>'+t[0]+'</b>',ZN[t[1]],ZN,1));
+ s=sec('Високосний рік','Запам’ятай: у високосному році останні дві цифри складають число, яке ділиться на 4.',2,1);
+ const Y=['Звичайний (365 діб)','Високосний (366 діб)'];
+ sh(YP).slice(0,2).forEach(y=>mc(s,'Рік <b>'+y+'</b>',Y[y%4==0?1:0],Y,1));
+ upd();window.scrollTo(0,0)}
+
+function summary(){
+ const G=secs.reduce((a,s)=>a+s.got,0),M=secs.reduce((a,s)=>a+s.max,0),D=secs.reduce((a,s)=>a+s.done,0),p=Math.round(G/M*100);
+ const m=p>=90?'Чудово! Ти справжній астроном!':p>=70?'Дуже добре! Ще трохи — і буде відмінно.':p>=50?'Непогано! Перечитай підручник і спробуй ще раз.':'Не засмучуйся! Повтори матеріал і спробуй знову.';
+ sum.innerHTML='<h2><span>Підсумок</span></h2><div class="big">'+G+' з '+M+'</div><p>'+p+'% правильних відповідей</p>'+
+ secs.map(s=>'<div class="row"><span>'+s.n+'</span><b class="'+(s.got==s.max?'g':s.got/s.max<.5?'r':'')+'">'+s.got+'/'+s.max+'</b></div>').join('')+
+ (D<M?'<p>Ще не виконано завдань: '+(M-D)+'</p>':'<p><b>'+m+'</b></p>')+
+ (mode=='test'?'<p class="ss"></p><button onclick="setMode(\'trainer\')">Потренуватися в режимі тренажера</button>':'<button onclick="init()">Спробувати ще раз (нові запитання)</button>');
+ sum.scrollIntoView({behavior:'smooth'})}
+
+function reveal(it){
+ const bs=[...it.w.children],ok=it.picked===it.right;
+ bs.forEach(x=>{x.disabled=true;x.classList.remove('sel');if(x.textContent===it.picked)x.classList.add(ok?'ok':'bad');if(x.textContent===it.right)x.classList.add('ok')});
+ it.d.classList.add(ok?'r':'w')}
+function finish(){
+ if(finished)return;finished=true;elapsed=Math.round((Date.now()-t0)/1000);
+ secs.forEach(s=>s.got=0);
+ items.forEach(it=>{it.ok=it.picked===it.right;if(it.ok)it.s.got++;if(!it.orb)reveal(it)});
+ secs.forEach(s=>{s.done=s.max;s.b.textContent=s.got+'/'+s.max});
+ document.querySelectorAll('.pt.sel').forEach(g=>g.classList.remove('sel'));
+ $('fin').disabled=true;finished=true;started=false;payload=build();LS.set('rz_pending',JSON.stringify(payload));summary();send()}
+function build(){
+ let G=0,M=0;const g=[0,0,0];secs.forEach(s=>{G+=s.got;M+=s.max;g[s.g]+=s.got});
+ return {w:'Рухи Землі та теплові пояси',cls:student.cls,name:student.name,score:G,total:M,pct:Math.round(G/M*100),t1:g[0],t2:g[1],t3:g[2],sec:elapsed,
+  answers:items.map((it,i)=>(i+1)+(it.ok?'+':'-')).join(' '),
+  sheet:'Результати Рухи Землі',parts:['Тест','Рухи Землі','Теплові пояси'],
+  detailSheet:'Деталі Рухи Землі',detailNote:'Розділ',
+  details:items.map((it,i)=>[i+1,it.text,it.picked,it.right,it.ok?'так':'ні',it.s.n])}}
+function msg(x,retry){document.querySelectorAll('.ss').forEach(e=>{e.innerHTML=x+(retry?' <button onclick="send()">Надіслати ще раз</button>':'')})}
+function send(){
+ msg('Надсилаю результат…');
+ if(!SCRIPT_URL){msg('Адресу скрипта не вказано (константа SCRIPT_URL у коді сторінки).',1);return}
+ fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+  .then(()=>{LS.del('rz_pending');msg('Результат надіслано вчителю.')})
+  .catch(()=>msg('Не вдалося надіслати результат. Перевір інтернет.',1))}
+function view(on){['bar','app','fin','sum'].forEach(i=>$(i).hidden=!on)}
+function setMode(m){
+ if(m=='test'&&mode=='test'&&started&&!finished)return;
+ if(mode=='test'&&started&&!finished&&!confirm('Роботу буде перервано, а пройти її ще раз не вдасться. Вийти?'))return;
+ started=false; mode=m;$('m1').classList.toggle('on',m=='trainer');$('m2').classList.toggle('on',m=='test');
+ if(m=='test'){
+  const used=LS.get('rz_diag');
+  $('reg').hidden=false;$('regform').hidden=!!used;$('blocked').hidden=!used;
+  view(0);app.innerHTML='';sum.innerHTML='';items=[];secs=[];$('st').textContent='';
+  if(used&&LS.get('rz_pending')){try{payload=JSON.parse(LS.get('rz_pending'));msg('Результат попередньої роботи ще не надіслано.',1)}catch(e){}}}
+ else{$('reg').hidden=true;view(1);init()}}
+function startTest(){
+ const c=$('cls').value.trim(),n=$('nm').value.trim(),f=$('sn').value.trim();
+ if(!c||!n||!f){$('regerr').textContent='Заповни прізвище, ім’я та клас.';return}
+ if(LS.get('rz_diag'))return;
+ $('regerr').textContent='';student={cls:c,name:f+' '+n};
+ LS.set('rz_diag',JSON.stringify({n:student.name,c:c,t:Date.now()}));
+ started=true;finished=false;$('reg').hidden=true;view(1);init();t0=Date.now()}
+if(location.hash=='#reset'){LS.del('rz_diag');LS.del('rz_pending')}
+setMode('trainer');
+</script>
+</body>
+</html>
