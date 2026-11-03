@@ -69,14 +69,15 @@ input:focus{outline:3px solid #8fbce0;border-color:#3f86ad}
 <ul class="note">
 <li>Правильні відповіді <b>не показуються одразу</b>: ти побачиш їх після завершення роботи.</li>
 <li>Обрану відповідь (вона підсвічується синім) можна <b>змінити</b>, поки не натиснеш «Завершити роботу».</li>
-<li>Пройти роботу можна <b>лише один раз</b>.</li>
+<li>Якщо сторінку закрито або пропав інтернет до завершення, роботу можна <b>продовжити</b> або почати заново. Після завершення роботи пройти її повторно <b>не можна</b>.</li>
 <li>Результат автоматично надсилається вчителю.</li>
 </ul>
 <label>Прізвище<input id="sn" maxlength="30" autocomplete="off"></label>
 <label>Ім’я<input id="nm" maxlength="30" autocomplete="off"></label>
 <label>Клас<input id="cls" maxlength="20" autocomplete="off"></label>
 <p id="regerr"></p><button onclick="startTest()">Почати</button></div>
-<div id="blocked" hidden><p>Діагностувальну роботу на цьому пристрої вже розпочато або виконано. Пройти її можна лише один раз.</p><p class="ss"></p></div>
+<div id="resume" hidden><p id="rtext"></p><button onclick="resume()">Продовжити роботу</button> <button onclick="restart()">Почати заново</button></div>
+<div id="blocked" hidden><p>Діагностувальну роботу на цьому пристрої вже виконано. Пройти її повторно не можна.</p><p class="ss"></p></div>
 </section>
 <div id="bar"><div class="tr"><i id="pr"></i></div><span id="st"></span></div>
 <div id="app"></div>
@@ -85,11 +86,13 @@ input:focus{outline:3px solid #8fbce0;border-color:#3f86ad}
 </main>
 <script>
 const app=document.getElementById('app'),sum=document.getElementById('sum');
-const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycby3KIRY4woH0qQ0dH6wxS1u2JKbRTzhyRrjZjaZAzubW_2iyHs7O4XhxKKX9X004Yer/exec'; // ← встав сюди адресу веб-застосунку Google Apps Script (закінчується на /exec)
+let rnd=Math.random;
+function mk(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const SCRIPT_URL=''; // ← встав сюди адресу веб-застосунку Google Apps Script (закінчується на /exec)
 const $=i=>document.getElementById(i);
 const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
-let secs=[],mode='trainer',items=[],student={},t0=0,elapsed=0,finished=false,started=false,payload=null;
+let secs=[],mode='trainer',items=[],student={},t0=0,elapsed=0,finished=false,started=false,payload=null,seed=0,spent=0,sess=0,saved=null;
 
 const TP=[
 ['Навколо чого обертається Земля, що спричиняє зміну дня і ночі?','Навколо своєї осі','Навколо Сонця','Навколо Місяця'],
@@ -129,6 +132,7 @@ function upd(){
  let D,M;
  if(mode=='test'){M=items.length;D=items.filter(i=>i.picked!=null).length;$('fin').disabled=finished||D<M}
  else{D=secs.reduce((a,s)=>a+s.done,0);M=secs.reduce((a,s)=>a+s.max,0)}
+ if(mode=='test'&&started&&!finished)save();
  $('pr').style.width=(M?D/M*100:0)+'%';
  $('st').textContent=(mode=='test'?'Відповіді: ':'Виконано: ')+D+' з '+M;
  if(mode!='test'&&M&&D==M)setTimeout(summary,900)}
@@ -145,6 +149,7 @@ function mc(s,text,right,opts,fix){
    if(!ok)bs.find(x=>x.textContent===right).classList.add('ok');
    d.classList.add(ok?'r':'w');ans(s,ok)};
   w.appendChild(b)});
+ if(saved&&saved[items.length-1]!=null){it.picked=saved[items.length-1];const x=[...w.children].find(b=>b.textContent===it.picked);if(x)x.classList.add('sel')}
  d.appendChild(w);s.box.appendChild(d)}
 
 function orbit(){
@@ -154,8 +159,9 @@ function orbit(){
  d.innerHTML='<p id="qt"></p><svg class="orb" viewBox="0 0 380 205"><ellipse cx="190" cy="100" rx="120" ry="65" fill="none" stroke="#9b3a9b" stroke-width="3"/><circle cx="190" cy="100" r="17" fill="#ffc933" stroke="#f0a000" stroke-width="3"/><text x="190" y="134" text-anchor="middle" font-size="12" fill="#8a5a00">Сонце</text>'+
  P.map((p,i)=>'<text x="'+LP[i][0]+'" y="'+LP[i][1]+'" text-anchor="middle" font-size="13" fill="#333">'+LB[i]+'</text><g class="pt"><circle class="e" cx="'+p[0]+'" cy="'+p[1]+'" r="15"/><circle cx="'+(p[0]+4)+'" cy="'+(p[1]-3)+'" r="6" fill="#6fbf5f" pointer-events="none"/></g>').join('')+'</svg>';
  s.box.appendChild(d);
- const its=Q.map(q=>({s,text:q[0],right:LB[q[1]],picked:null,orb:1}));items.push(...its);
- const qt=d.querySelector('#qt'),gs=[...d.querySelectorAll('.pt')];let k=0,lock=false;
+ const its=Q.map(q=>({s,text:q[0],right:LB[q[1]],picked:null,orb:1}));const base=items.length;items.push(...its);
+ if(saved)its.forEach((x,i)=>{if(saved[base+i]!=null)x.picked=saved[base+i]});
+ const qt=d.querySelector('#qt'),gs=[...d.querySelectorAll('.pt')];let k=its.filter(x=>x.picked!=null).length,lock=false;
  const show=()=>{qt.textContent=(k+1)+'/'+n+'. '+Q[k][0];gs.forEach(g=>g.setAttribute('class','pt'));lock=false};
  gs.forEach((g,i)=>g.onclick=()=>{
   if(lock)return;lock=true;
@@ -164,9 +170,10 @@ function orbit(){
   g.classList.add(ok?'ok':'bad');if(!ok)gs[Q[k][1]].classList.add('ok');
   ans(s,ok);k++;
   if(k<n)setTimeout(show,1500);else qt.textContent='Завдання виконано!'});
- show()}
+ if(k>=n){qt.textContent='Відповіді записано';lock=true}else show()}
 
 function init(){
+ rnd=mode=='test'?mk(seed):Math.random;
  app.innerHTML=mode=='test'?'<p class="hint">Правильні відповіді не показуються одразу. Обрану відповідь (вона підсвічується синім) можна змінити, поки не натиснеш «Завершити роботу» внизу сторінки. Кнопка стане активною, коли ти відповіси на всі питання.</p>':'';sum.innerHTML='';secs=[];items=[];finished=false;
  const fb=$('fin');fb.textContent=mode=='test'?'Завершити роботу':'Показати підсумок';fb.onclick=mode=='test'?finish:summary;fb.disabled=mode=='test';
  let s=sec('Тест','Обери одну правильну відповідь. Питання щоразу різні.',5,0);
@@ -197,12 +204,12 @@ function reveal(it){
  bs.forEach(x=>{x.disabled=true;x.classList.remove('sel');if(x.textContent===it.picked)x.classList.add(ok?'ok':'bad');if(x.textContent===it.right)x.classList.add('ok')});
  it.d.classList.add(ok?'r':'w')}
 function finish(){
- if(finished)return;finished=true;elapsed=Math.round((Date.now()-t0)/1000);
+ if(finished)return;finished=true;elapsed=Math.round((spent+Date.now()-sess)/1000);
  secs.forEach(s=>s.got=0);
  items.forEach(it=>{it.ok=it.picked===it.right;if(it.ok)it.s.got++;if(!it.orb)reveal(it)});
  secs.forEach(s=>{s.done=s.max;s.b.textContent=s.got+'/'+s.max});
  document.querySelectorAll('.pt.sel').forEach(g=>g.classList.remove('sel'));
- $('fin').disabled=true;finished=true;started=false;payload=build();LS.set('rz_pending',JSON.stringify(payload));summary();send()}
+ $('fin').disabled=true;finished=true;started=false;payload=build();LS.set('rz_pending',JSON.stringify(payload));LS.set('rz_done','1');LS.del('rz_prog');summary();send()}
 function build(){
  let G=0,M=0;const g=[0,0,0];secs.forEach(s=>{G+=s.got;M+=s.max;g[s.g]+=s.got});
  return {w:'Рухи Землі та теплові пояси',cls:student.cls,name:student.name,score:G,total:M,pct:Math.round(G/M*100),t1:g[0],t2:g[1],t3:g[2],sec:elapsed,
@@ -218,24 +225,34 @@ function send(){
   .then(()=>{LS.del('rz_pending');msg('Результат надіслано вчителю.')})
   .catch(()=>msg('Не вдалося надіслати результат. Перевір інтернет.',1))}
 function view(on){['bar','app','fin','sum'].forEach(i=>$(i).hidden=!on)}
+function save(){LS.set('rz_prog',JSON.stringify({s:student,seed:seed,p:items.map(i=>i.picked),sp:spent+(Date.now()-sess)}))}
+function getProg(){try{return JSON.parse(LS.get('rz_prog'))}catch(e){return null}}
 function setMode(m){
  if(m=='test'&&mode=='test'&&started&&!finished)return;
- if(mode=='test'&&started&&!finished&&!confirm('Роботу буде перервано, а пройти її ще раз не вдасться. Вийти?'))return;
- started=false; mode=m;$('m1').classList.toggle('on',m=='trainer');$('m2').classList.toggle('on',m=='test');
+ started=false;mode=m;$('m1').classList.toggle('on',m=='trainer');$('m2').classList.toggle('on',m=='test');
  if(m=='test'){
-  const used=LS.get('rz_diag');
-  $('reg').hidden=false;$('regform').hidden=!!used;$('blocked').hidden=!used;
+  const done=LS.get('rz_done'),pr=done?null:getProg();
+  $('reg').hidden=false;$('regform').hidden=!!(done||pr);$('blocked').hidden=!done;$('resume').hidden=!pr;
   view(0);app.innerHTML='';sum.innerHTML='';items=[];secs=[];$('st').textContent='';
-  if(used&&LS.get('rz_pending')){try{payload=JSON.parse(LS.get('rz_pending'));msg('Результат попередньої роботи ще не надіслано.',1)}catch(e){}}}
+  if(pr){const a=pr.p.filter(x=>x!=null).length;$('rtext').textContent='Робота розпочата, але не завершена: '+pr.s.name+', '+pr.s.cls+'. Відповіді: '+a+' з '+pr.p.length+'.'}
+  if(done){
+   if(LS.get('rz_pending')){try{payload=JSON.parse(LS.get('rz_pending'));msg('Результат не вдалося надіслати. Спробуй ще раз, коли з’явиться інтернет.',1)}catch(e){}}
+   else msg('Результат надіслано вчителю.')}}
  else{$('reg').hidden=true;view(1);init()}}
+function begin(){started=true;finished=false;sess=Date.now();$('reg').hidden=true;view(1);init();saved=null}
 function startTest(){
  const c=$('cls').value.trim(),n=$('nm').value.trim(),f=$('sn').value.trim();
  if(!c||!n||!f){$('regerr').textContent='Заповни прізвище, ім’я та клас.';return}
- if(LS.get('rz_diag'))return;
- $('regerr').textContent='';student={cls:c,name:f+' '+n};
- LS.set('rz_diag',JSON.stringify({n:student.name,c:c,t:Date.now()}));
- started=true;finished=false;$('reg').hidden=true;view(1);init();t0=Date.now()}
-if(location.hash=='#reset'){LS.del('rz_diag');LS.del('rz_pending')}
+ if(LS.get('rz_done')||getProg())return;
+ $('regerr').textContent='';student={cls:c,name:f+' '+n};seed=Math.random()*4294967296>>>0;saved=null;spent=0;begin()}
+function resume(){
+ const p=getProg();if(!p)return;
+ student=p.s;seed=p.seed;saved=p.p;spent=p.sp||0;begin()}
+function restart(){
+ const p=getProg();if(!p)return;
+ if(!confirm('Почати роботу заново? Попередні відповіді буде втрачено, а запитання зміняться.'))return;
+ student=p.s;seed=Math.random()*4294967296>>>0;saved=null;spent=0;LS.del('rz_prog');begin()}
+if(location.hash=='#reset'){['rz_diag','rz_prog','rz_done','rz_pending'].forEach(LS.del)}
 setMode('trainer');
 </script>
 </body>
